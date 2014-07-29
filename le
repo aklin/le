@@ -1,0 +1,46 @@
+# Synergic Visual Edit on Lines for Terminal Operators
+#! /bin/dash
+padding="¬"
+vpadding="_"
+yoffset=0
+ymax=$((`tput lines`-2))
+buffer="$1"
+
+function ver_line {
+	set -- `ls -o "$buffer"`
+	len=$(( $((`tput cols` - `echo "$buffer" | wc -m`)) - `echo "$1" | wc -m`))
+	out="-$buffer"
+	for i in `seq 1 "$len"`; do
+		out="$out$vpadding"
+	done
+	# Get file permissions for buffer
+	
+	printf "%s%s\n" "$out" "$1"
+}
+
+function pad_to_end {
+	# echo "Pad: $1"
+	[ "$1" -gt "0" ] && \
+	for i in `seq 1 "$1"`; do
+		printf "%s\n" $padding
+	done
+}
+
+
+[ "$buffer" == "" ] && (printf "Usage: %s FILE\n" "$0"; exit) || \
+while :
+do
+	# clear
+	page=$(cat -n $buffer | head -n $ymax)
+	echo "$page"
+	pad=$(( $ymax- `echo "$page" | wc -l`))
+	pad_to_end $pad
+	ver_line
+	# ed -p "$buffer"
+	read -n 1 c -ep ": " act
+	# case 
+	# [ "$act" == "" ] && continue || echo "$act" | ed "$buffer"
+done
+#Figure out if we need to add padding
+
+#echo $ymax
